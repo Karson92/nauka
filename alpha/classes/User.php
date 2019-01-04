@@ -36,23 +36,38 @@ class User
 	{
 		$regEx = '/^[^\W][a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\@[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\.[a-zA-Z]{2,4}$/';
 
-		if(mb_strlen($login, 'UTF-8') < 4) { throw new Exception("Wygenerowany Login jest za któtki, sprawdź złotko czy jest dobrze wpisane nazwisko :)", 101); }
-		if(!preg_match($regEx, $email)) { throw new Exception("Ten email jest z dupy, wpisz poprawny", 102); }
+		if(mb_strlen($login, 'UTF-8') < 4) { throw new Exception("Wygenerowany Login jest za któtki, sprawdź czy jest dobrze wpisane nazwisko :)", 101); }
+		if(!preg_match($regEx, $email)) { throw new Exception("Ten email jest z zły, wpisz poprawny", 102); }
 		if($password !== $password2) { throw new Exception("Hasła nie sa takie same", 103); }
-		if(mb_strlen($password, 'UTF-8') < 6) { throw new Exception("hasła są za krótkie", 104); }
+		if(mb_strlen($password, 'UTF-8') < 6) { throw new Exception("Hasła są za krótkie", 104); }
 		
-		if(!$this->dbo) { throw new Exception("Brłąd podczas połączenia z bazą danych", 105); }  
+		if(!$this->dbo) { throw new Exception("Błąd podczas połączenia z bazą danych", 105); }  
 
-		$query = $this->dbo->query("SELECT login, email FROM users WHERE login='$login' OR email='$email'");
-		$data = $query->fetch();
-		$query->closeCursor();
+			$sql = "SELECT login, email FROM users WHERE login=:login OR email=:email";
 
-		if($login == $data['login']) { throw new Exception("Ktoś taki już istnieje!!", 106); }
-		if($email == $data['email']) { throw new Exception("taki email już ktoś posiada", 107); }
+				$stmt = $this->dbo->prepare($sql);
+				$stmt->bindValue(':login', $login);
+				$stmt->bindValue(':email', $email);
+				$stmt->execute();
+				$data = $stmt->fetch();
+				$stmt->closeCursor();
 
-		$this->dbo->exec("INSERT INTO users VALUES (0, '$login', '$password', '$name', '$surname', '$email')");
+					if($login == $data['login']) { throw new Exception("Ktoś taki już istnieje!!", 106); }
+					if($email == $data['email']) { throw new Exception("Taki email już ktoś posiada", 107); }
+
+			$sql = "INSERT INTO users VALUES (0, :login, :password, :name, :surname, :email)";
+			$salt = '4543k098hg34jb5k344b542b3bk35j6h568j8908kjb09b7b894b6';
+			$crypt = hash_hmac('sha256', $password, $salt);
+
+				$stmt = $this->dbo->prepare($sql);
+				$stmt->bindValue(':login', $login);
+				$stmt->bindParam(':password', $crypt);
+				$stmt->bindValue(':name', $name);
+				$stmt->bindValue(':surname', $surname);
+				$stmt->bindValue(':email', $email);
+				$stmt->execute();
 		
-		return true;
+				return true;
 	}
 
 	public function login($login, $password)
