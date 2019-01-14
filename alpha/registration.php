@@ -7,7 +7,7 @@ if (isset($_POST['submit'])) {
 
 	if (empty($_POST['imie']) || empty($_POST['nazwisko']) || empty($_POST['email']) || empty($_POST['password']) || empty($_POST['password2']))
 	{
-		echo 'Weź podaj wszytkie dane, jo?';
+		echo 'Proszę podać wszystkie dane';
 	}
 	else
 	{
@@ -30,16 +30,17 @@ include 'classes/User.php';
 	$employee = new User();
 	$login = $employee->getLogin($user[0], $user[1]);
 
-	try {
-	$operator = $employee->registration($login, $user[0], $user[1], $user[2], $user[3], $user[4]);
-}
-catch(Exception $e)
-{
-	echo 'treść komunikatu: ' . $e->getMessage() . '<br>';
-	echo 'kod błędu:' . $e->getCode() . '<br>';
-}
+	try
+	{
+		$operator = $employee->registration($login, $user[0], $user[1], $user[2], $user[3], $user[4]);
+	}
+	catch(Exception $e)
+	{
+		echo 'treść komunikatu: ' . $e->getMessage() . '<br>';
+		echo 'kod błędu:' . $e->getCode() . '<br>';
+	}
 
-		}
+	}
 
 }
 

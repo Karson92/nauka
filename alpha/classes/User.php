@@ -37,7 +37,7 @@ class User
 		$regEx = '/^[^\W][a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\@[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\.[a-zA-Z]{2,4}$/';
 
 		if(mb_strlen($login, 'UTF-8') < 4) { throw new Exception("Wygenerowany Login jest za któtki, sprawdź czy jest dobrze wpisane nazwisko :)", 101); }
-		if(!preg_match($regEx, $email)) { throw new Exception("Ten email jest z zły, wpisz poprawny", 102); }
+		if(!preg_match($regEx, $email)) { throw new Exception("Ten email jest zły, wpisz poprawny", 102); }
 		if($password !== $password2) { throw new Exception("Hasła nie sa takie same", 103); }
 		if(mb_strlen($password, 'UTF-8') < 6) { throw new Exception("Hasła są za krótkie", 104); }
 		

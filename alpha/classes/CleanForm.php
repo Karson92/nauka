@@ -14,13 +14,7 @@ class CleanForm
 
 		return $return;
 	}
-/*
-	public function bindValue()???
-	{
-	
-	}
-	
-*/
+
 
 }
 
