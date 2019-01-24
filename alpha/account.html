@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8" />
+	<title>Rejestracja</title>
+</head>	
+
+<body>
+	
+<form method="post" action="account.php">
+	<fieldset>
+		<legend>Zmiana hasła</legend>
+		<ol>
+			<li><label for="login">Obecne hasło:</label><input type="password" name="password" /></li>
+			<li><label for="login">Nowe hasło:</label><input type="password" name="newPassword" /></li>
+			<li><label for="login">Nowe Hasło(powtórz):</label><input type="password" name="newPasswordRepeat" /></li>
+		</ol>
+		<input type="submit" name="changePassword" value="Wyślij">
+	</fieldset>
+</form>
+<p></p>
+<p></p>
+<p></p>
+
+<form method="post" action="account.php">
+	<fieldset>
+		<legend>Usunięcie konta</legend>
+		<input type="submit" name="delete" value="Wyślij">
+	</fieldset>
+</form>
+
+</body>
+</html>

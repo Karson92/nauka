@@ -7,6 +7,8 @@ define('DB_NAME', 'nauka');
 
 class User
 {
+	private $salt = '4543k098hg34jb5k344b542b3bk35j6h568j8908kjb09b7b894b6';
+	private $sql_log = "SELECT idu, login, password FROM users WHERE login=:login";
 
 	public function __construct()
 	{
@@ -22,7 +24,7 @@ class User
 		} 
 		 
 	}
-	public function getLogin($name, $surname)
+	public function getLogin(string $name, string $surname)
 	{
 		$name = ucwords($name);
 		$name = substr($name, 0, 1);
@@ -32,7 +34,7 @@ class User
 		return $sum;
 	}
 
-	public function registration($login, $name, $surname, $password, $password2, $email)
+	public function registration(string $login, string $name, string $surname, string $password, string $password2, string $email)
 	{
 		$regEx = '/^[^\W][a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\@[a-zA-Z0-9_]+(\.[a-zA-Z0-9_]+)*\.[a-zA-Z]{2,4}$/';
 
@@ -56,8 +58,7 @@ class User
 					if($email == $data['email']) { throw new Exception("Taki email już ktoś posiada", 107); }
 
 			$sql = "INSERT INTO users VALUES (0, :login, :password, :name, :surname, :email)";
-			$salt = '4543k098hg34jb5k344b542b3bk35j6h568j8908kjb09b7b894b6';
-			$crypt = hash_hmac('sha256', $password, $salt);
+			$crypt = hash_hmac('sha256', $password, $this->salt);
 
 				$stmt = $this->dbo->prepare($sql);
 				$stmt->bindValue(':login', $login);
@@ -70,38 +71,73 @@ class User
 				return true;
 	}
 
-	public function login($login, $password)
+	public function login(string $login, string $password)
 	{
+		if(!$this->dbo) { throw new Exception("Błąd podczas połączenia z bazą danych", 121); }
 
+				$stmt = $this->dbo->prepare($this->sql_log);
+				$stmt->bindValue(':login', $login);
+				$stmt->execute();
+				$data = $stmt->fetch();
+				$stmt->closeCursor();
 
+					if($login !== $data['login']) { throw new Exception("Błędne dane logowania!!", 122); }
+						
+						$crypt = hash_hmac('sha256', $password, $this->salt);
+						// sprawdzamy czy hasła są identyczne
+						if(!hash_equals($crypt, $data['password'])) { throw new Exception("Błędne dane logowania!!", 122); }
 
+							return $data['idu'];
 
 	}
 
-	public function logout($login)
+	public function changePassword(string $login, string $password, string $newPassword, string $newPasswordRepeat)
 	{
+		if(!$this->dbo) { throw new Exception("Błąd podczas połączenia z bazą danych", 131); }
 
+			$stmt = $this->dbo->prepare($this->sql_log);
+			$stmt->bindValue(':login', $login);
+			$stmt->execute();
+			$data = $stmt->fetch();
+			$stmt->closeCursor();
 
-	}
+				$crypt = hash_hmac('sha256', $password, $this->salt);
+				// sprawdzamy czy hasła są identyczne
+					if(!hash_equals($crypt, $data['password'])) { throw new Exception("Błędne obecne hasło!!", 132); }
+					if($newPassword !== $newPasswordRepeat) { throw new Exception("Wprowadzone nowe hasła nie sa takie same", 133); }
+					if(mb_strlen($newPassword, 'UTF-8') < 6) { throw new Exception("Wprowadzone nowe hasła są za krótkie", 134); }
 
-	public function changePass($login, $password, $passwordNew, $passwordNewRepeat)
-	{
+						$sql = "UPDATE users SET password = :password";
+						$crypt = hash_hmac('sha256', $newPassword, $this->salt);
 
+							$stmt = $this->dbo->prepare($sql);
+							$stmt->bindParam(':password', $crypt);
+							$stmt->execute();
+
+							return true;
 		
 	}
 
-	public function delete($login)
+	public function delete(string $login)
 	{
+		if(!$this->dbo) { throw new Exception("Błąd podczas połączenia z bazą danych", 141); }
 
+			$stmt = $this->dbo->prepare($this->sql_log);
+			$stmt->bindValue(':login', $login);
+			$stmt->execute();
+			$data = $stmt->fetch();
+			$stmt->closeCursor();
 
-	}
-	
+				if($login !== $data['login']) { throw new Exception("Nie ma takiego loginu!!", 142); }
 
+					$sql = "DELETE FROM users WHERE login = :login";
 
+						$stmt = $this->dbo->prepare($sql);
+						$stmt->bindValue(':login', $login);
+						$stmt->execute();
+
+						return true;
+	}	
 }
-
-
-
-
 
 ?>

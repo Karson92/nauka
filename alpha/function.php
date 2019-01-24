@@ -1,0 +1,9 @@
+<?php
+
+function Valid($array)
+{
+	
+}
+
+
+?>
